@@ -1,0 +1,91 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Feb 18 10:18:09 2021
+
+@author: Andy
+"""
+import numpy as np
+import matplotlib.pyplot as pl
+from scipy.integrate import odeint
+
+L1 = 0.2429 #L1 in m
+L2 = 0.1912 #L2 in m 
+m1 = 0.3557 #m1 in kg
+m2 = 0.137  #m2 in kg
+g = 9.81  #Gravitational accel constant
+
+""" Solution to the Differential Equations"""
+
+def nonlinear_pendulum(y, t, L1, L2, m1, m2):
+    """Return the first derivatives of y = theta1, z1, theta2, z2."""
+    theta1, z1, theta2, z2 = y
+
+    c, s = np.cos(theta1-theta2), np.sin(theta1-theta2)
+
+    theta1dot = z1
+    
+    z1dot = (m2*g*np.sin(theta2)*c - m2*s*(L1*z1**2*c + L2*z2**2) -
+             (m1+m2)*g*np.sin(theta1)) / L1 / (m1 + m2*s**2)
+    
+    theta2dot = z2
+    
+    z2dot = ((m1+m2)*(L1*z1**2*s - g*np.sin(theta2) + g*np.sin(theta1)*c) + 
+             m2*L2*z2**2*s*c) / L2 / (m1 + m2*s**2)
+    
+    return theta1dot, z1dot, theta2dot, z2dot
+
+
+# array of times to evaluate the eqns of motion
+n=10
+t = np.linspace(0,n,30*n)
+
+# Initial conditions: 
+# angle1, angle1 velo, angle 2, angle 2 velo
+y0 = np.array([0,0,0.1,0])
+
+# Do the numerical integration of the equations of motion
+y = odeint(nonlinear_pendulum, y0, t, args=(L1, L2, m1, m2))
+
+
+""" Plotting Information"""
+
+#Position vs Time Plots 
+# pl.plot(t,y) # Plot everything vs time
+
+pl.plot(t,y[:,0],label='$\Theta_1$') # Plot Theta 1 vs time
+
+# pl.plot(t,y[:,1]) # Plot Angle 1 velocity vs time
+# pl.ylabel('$\dot{\Theta}_2$')
+
+pl.plot(t,y[:,2], label = '$\Theta_2$') # Plot Theta 2 vs time
+
+# pl.plot(t,y[:,3]) # Plot Angle 2 velocity vs time
+# pl.ylabel('$\dot{\Theta}_2$')
+
+pl.xlabel('time')
+pl.ylabel('Angle in radians')
+pl.legend()
+pl.show()
+
+
+#Phase Space Plots 
+# pl.plot(y[:,0],y[:,2]) # Position phase space
+# pl.xlabel('$\Theta_1$')
+# pl.ylabel('$\Theta_2$')
+
+# pl.scatter(y[:,1],y[:,3], s=1) # Angular velocity phase space
+# pl.xlabel('$\dot{\Theta}_1$')
+# pl.ylabel('$\dot{\Theta}_2$')
+
+# pl.show()
+
+""" Phase Space Plots """
+pl.plot(y[:,0],y[:,2]) # Position phase space
+pl.xlabel('$\Theta_1$')
+pl.ylabel('$\Theta_2$')
+
+# pl.scatter(y[:,1],y[:,3], s=1) # Angular velocity phase space
+# pl.xlabel('$\dot{\Theta}_1$')
+# pl.ylabel('$\dot{\Theta}_2$')
+
+pl.show()
